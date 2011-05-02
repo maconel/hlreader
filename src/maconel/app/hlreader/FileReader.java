@@ -47,7 +47,8 @@ public class FileReader {
 
     public void close() {
         try {
-            mFile.close();
+            if (mFile != null)
+                mFile.close();
         } catch (IOException e) {
             Log.e("hlreader", String.format("FileReader.close|error 0|e=%s", e.getMessage()));
         }
