@@ -1,5 +1,6 @@
 package maconel.app.hlreader;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Paint.FontMetricsInt;
@@ -10,10 +11,13 @@ public class ContentControl extends Control {
     int mFontHeight = 0;
     FileReader mFileReader;
 
+    public ContentControl(Context context) {
+        super(context);
+    }
+
     public void init(Canvas canvas) {
         super.init(canvas);
 
-        mPaint.setARGB(0xFF, 0xFF, 0xFF, 0xFF);
         mPaint.setTextSize(32);
 
         FontMetricsInt fmi = mPaint.getFontMetricsInt();
@@ -26,6 +30,12 @@ public class ContentControl extends Control {
 
     public void setFileReader(FileReader fileReader) {
         mFileReader = fileReader;
+    }
+
+    public void setForeColor(int r, int g, int b) {
+        super.setForeColor(r, g, b);
+
+        mPaint.setARGB(0xFF, r, g, b);
     }
 
     public void draw(Canvas canvas) {

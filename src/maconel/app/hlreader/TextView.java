@@ -18,9 +18,10 @@ import android.view.View.OnTouchListener;
 
 public class TextView extends SurfaceView implements SurfaceHolder.Callback, OnTouchListener, ButtonControlCallback {
     List<Control> mControls = new ArrayList<Control>();
-    ContentControl mContentControl = new ContentControl();
-    ButtonControl mNextPageButton = new ButtonControl();
-    ButtonControl mPrevPageButton = new ButtonControl();
+    ContentControl mContentControl = null;
+    ButtonControl mNextPageButton = null;
+    ButtonControl mPrevPageButton = null;
+    InfoBarControl mInfoBarControl = null;
     Canvas mBitmapCanvas = new Canvas();
     Bitmap mBitmap;
     Paint mBitmapPaint = new Paint();
@@ -28,10 +29,20 @@ public class TextView extends SurfaceView implements SurfaceHolder.Callback, OnT
 
     public TextView(Context context) {
         super(context);
+
+        mContentControl = new ContentControl(context);
+        mNextPageButton = new ButtonControl(context);
+        mPrevPageButton = new ButtonControl(context);
+        mInfoBarControl = new InfoBarControl(context);
     }
 
     public TextView(Context context, AttributeSet attrs) {
         super(context, attrs);
+
+        mContentControl = new ContentControl(context);
+        mNextPageButton = new ButtonControl(context);
+        mPrevPageButton = new ButtonControl(context);
+        mInfoBarControl = new InfoBarControl(context);
     }
 
     public void init() {
@@ -49,7 +60,13 @@ public class TextView extends SurfaceView implements SurfaceHolder.Callback, OnT
         mControls.add(mPrevPageButton);
 
         mContentControl.setFileReader(mFileReader);
+        mContentControl.setForeColor(255, 255, 255);
         mControls.add(mContentControl);
+
+        mInfoBarControl.setProgress(20);
+        mInfoBarControl.setForeColor(255, 255, 255);
+        mInfoBarControl.setBackColor(100, 100, 100);
+        mControls.add(mInfoBarControl);
 
         for (Control control : mControls) {
             control.init(mBitmapCanvas);
@@ -106,7 +123,8 @@ public class TextView extends SurfaceView implements SurfaceHolder.Callback, OnT
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        mContentControl.setRect(getTop(), getLeft(), getWidth(), getHeight());
+        mContentControl.setRect(getLeft(), getTop(), getWidth(), getHeight() - 20);
+        mInfoBarControl.setRect(0, getHeight() - 20, getWidth(), getHeight());
 
         mBitmap = Bitmap.createBitmap(getWidth(), getHeight(), Config.RGB_565);
         mBitmapCanvas.setBitmap(mBitmap);
