@@ -21,6 +21,8 @@ public class MainActivity extends Activity {
         setContentView(R.layout.main);
 
         mTextView = (TextView) findViewById(R.id.textview);
+
+        Config.load();
     }
 
     protected void onStart() {
