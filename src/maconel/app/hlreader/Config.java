@@ -1,65 +1,100 @@
 package maconel.app.hlreader;
 
-import java.io.IOException;
-
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Rect;
 
 public class Config {
-    static final protected String FILENAME = "cfg.ini";
-    static public Rect nextPageButtonRect;
-    static public Rect prevPageButtonRect;
-    static public Rect findButtonRect;
-    static public Rect posButtonRect;
-    static public Rect openButtonRect;
-    static public int foreColor;
-    static public int backColor;
-    static public int fontSize;
+    protected static final String PREFS_NAME = "hlreader";
+    public static Rect nextPageButtonRect = new Rect();
+    public static Rect prevPageButtonRect = new Rect();
+    public static Rect findButtonRect = new Rect();
+    public static Rect posButtonRect = new Rect();
+    public static Rect openButtonRect = new Rect();
+    public static int contentForeColor;
+    public static int contentBackColor;
+    public static int buttonForeColor;
+    public static int buttonBackColor;
+    public static int fontSize;
 
-    static public void load() {
-        nextPageButtonRect.left = getValue("nextPageButtonRect", "left", 0);
-        nextPageButtonRect.top = getValue("nextPageButtonRect", "top", 0);
-        nextPageButtonRect.right = getValue("nextPageButtonRect", "right", 0);
-        nextPageButtonRect.bottom = getValue("nextPageButtonRect", "bottom", 0);
+    public static void load(Context context) {
+        SharedPreferences settings = context.getSharedPreferences(PREFS_NAME, 0);
 
-        prevPageButtonRect.left = getValue("prevPageButtonRect", "left", 0);
-        prevPageButtonRect.top = getValue("prevPageButtonRect", "top", 0);
-        prevPageButtonRect.right = getValue("prevPageButtonRect", "right", 0);
-        prevPageButtonRect.bottom = getValue("prevPageButtonRect", "bottom", 0);
+        // size = (120, 120), position = (x_center, y_center)
+        nextPageButtonRect.left = settings.getInt("nextPageButtonRect.left", 180);
+        nextPageButtonRect.top = settings.getInt("nextPageButtonRect.top", 367);
+        nextPageButtonRect.right = settings.getInt("nextPageButtonRect.right", 300);
+        nextPageButtonRect.bottom = settings.getInt("nextPageButtonRect.bottom", 487);
 
-        findButtonRect.left = getValue("findButtonRect", "left", 0);
-        findButtonRect.top = getValue("findButtonRect", "top", 0);
-        findButtonRect.right = getValue("findButtonRect", "right", 0);
-        findButtonRect.bottom = getValue("findButtonRect", "bottom", 0);
+        // size = (80, 80), position = (x_center, top_of_nextPageButton)
+        prevPageButtonRect.left = settings.getInt("prevPageButtonRect.left", 200);
+        prevPageButtonRect.top = settings.getInt("prevPageButtonRect.top", 257);
+        prevPageButtonRect.right = settings.getInt("prevPageButtonRect.right", 280);
+        prevPageButtonRect.bottom = settings.getInt("prevPageButtonRect.bottom", 337);
 
-        posButtonRect.left = getValue("posButtonRect", "left", 0);
-        posButtonRect.top = getValue("posButtonRect", "top", 0);
-        posButtonRect.right = getValue("posButtonRect", "right", 0);
-        posButtonRect.bottom = getValue("posButtonRect", "bottom", 0);
+        // size = (80, 80), position = (x_center, y_top)
+        findButtonRect.left = settings.getInt("findButtonRect.left", 200);
+        findButtonRect.top = settings.getInt("findButtonRect.top", 20);
+        findButtonRect.right = settings.getInt("findButtonRect.right", 280);
+        findButtonRect.bottom = settings.getInt("findButtonRect.bottom", 100);
 
-        openButtonRect.left = getValue("openButtonRect", "left", 0);
-        openButtonRect.top = getValue("openButtonRect", "top", 0);
-        openButtonRect.right = getValue("openButtonRect", "right", 0);
-        openButtonRect.bottom = getValue("openButtonRect", "bottom", 0);
+        // size = (80, 80), position = (x_left, y_top)
+        posButtonRect.left = settings.getInt("posButtonRect.left", 20);
+        posButtonRect.top = settings.getInt("posButtonRect.top", 20);
+        posButtonRect.right = settings.getInt("posButtonRect.right", 100);
+        posButtonRect.bottom = settings.getInt("posButtonRect.bottom", 100);
 
-        foreColor = getValue("content", "foreColor", 0x808080);
-        backColor = getValue("content", "backColor", 0x808080);
-        fontSize = getValue("content", "fontSize", 28);
+        // size = (80, 80), position = (x_right, y_top)
+        openButtonRect.left = settings.getInt("openButtonRect.left", 380);
+        openButtonRect.top = settings.getInt("openButtonRect.top", 20);
+        openButtonRect.right = settings.getInt("openButtonRect.right", 460);
+        openButtonRect.bottom = settings.getInt("openButtonRect.bottom", 100);
+
+        contentForeColor = settings.getInt("content.contentForeColor", 0xFF808080);
+        contentBackColor = settings.getInt("content.contentBackColor", 0xFF000000);
+        buttonForeColor = settings.getInt("content.buttonForeColor", 0xFFFFFF00);
+        buttonBackColor = settings.getInt("content.buttonBackColor", 0xFF808080);
+        fontSize = settings.getInt("content.fontSize", 28);
     }
 
-    static public void save() {
-        //
-    }
+    public static void save(Context context) {
+        SharedPreferences settings = context.getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
 
-    static protected int getValue(String section, String variable, int defaultValue) {
-        int ret = 0;
+        editor.clear();
+        editor.commit();
 
-        try {
-            Integer.parseInt(ConfigurationFile.getProfileString(FILENAME, section, variable, ""));
-        } catch (NumberFormatException e) {
-            ret = defaultValue;
-        } catch (IOException e) {
-        }
+        editor.putInt("nextPageButtonRect.left", nextPageButtonRect.left);
+        editor.putInt("nextPageButtonRect.top", nextPageButtonRect.top);
+        editor.putInt("nextPageButtonRect.right", nextPageButtonRect.right);
+        editor.putInt("nextPageButtonRect.bottom", nextPageButtonRect.bottom);
 
-        return ret;
+        editor.putInt("prevPageButtonRect.left", prevPageButtonRect.left);
+        editor.putInt("prevPageButtonRect.top", prevPageButtonRect.top);
+        editor.putInt("prevPageButtonRect.right", prevPageButtonRect.right);
+        editor.putInt("prevPageButtonRect.bottom", prevPageButtonRect.bottom);
+
+        editor.putInt("findButtonRect.left", findButtonRect.left);
+        editor.putInt("findButtonRect.top", findButtonRect.top);
+        editor.putInt("findButtonRect.right", findButtonRect.right);
+        editor.putInt("findButtonRect.bottom", findButtonRect.bottom);
+
+        editor.putInt("posButtonRect.left", posButtonRect.left);
+        editor.putInt("posButtonRect.top", posButtonRect.top);
+        editor.putInt("posButtonRect.right", posButtonRect.right);
+        editor.putInt("posButtonRect.bottom", posButtonRect.bottom);
+
+        editor.putInt("openButtonRect.left", openButtonRect.left);
+        editor.putInt("openButtonRect.top", openButtonRect.top);
+        editor.putInt("openButtonRect.right", openButtonRect.right);
+        editor.putInt("openButtonRect.bottom", openButtonRect.bottom);
+
+        editor.putInt("content.contentForeColor", contentForeColor);
+        editor.putInt("content.contentBackColor", contentBackColor);
+        editor.putInt("content.buttonForeColor", buttonForeColor);
+        editor.putInt("content.buttonBackColor", buttonBackColor);
+        editor.putInt("content.fontSize", fontSize);
+
+        // editor.commit();
     }
 }

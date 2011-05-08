@@ -39,18 +39,22 @@ public class Control {
         mRect.bottom = bottom;
     }
 
-    public void setForeColor(int r, int g, int b) {
-        mForeColor = Color.rgb(r, g, b);
-        mForePaint.setARGB(0xFF, r, g, b);
+    public void setRect(Rect rect) {
+        mRect.set(rect);
+    }
+
+    public void setForeColor(int color) {
+        mForeColor = color;
+        mForePaint.setARGB(Color.alpha(color), Color.red(color), Color.green(color), Color.blue(color));
     }
 
     public int getForeColor() {
         return mForeColor;
     }
 
-    public void setBackColor(int r, int g, int b) {
-        mBackColor = Color.rgb(r, g, b);
-        mBackPaint.setARGB(0xFF, r, g, b);
+    public void setBackColor(int color) {
+        mBackColor = color;
+        mBackPaint.setARGB(Color.alpha(color), Color.red(color), Color.green(color), Color.blue(color));
     }
 
     public int getBackColor() {

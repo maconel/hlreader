@@ -2,12 +2,10 @@ package maconel.app.hlreader;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.graphics.Paint.FontMetricsInt;
 import android.util.Log;
 
 public class ContentControl extends Control {
-    protected Paint mPaint = new Paint();
     int mFontHeight = 0;
     FileReader mFileReader;
 
@@ -18,9 +16,9 @@ public class ContentControl extends Control {
     public void init(Canvas canvas) {
         super.init(canvas);
 
-        mPaint.setTextSize(32);
+        mForePaint.setTextSize(Config.fontSize);
 
-        FontMetricsInt fmi = mPaint.getFontMetricsInt();
+        FontMetricsInt fmi = mForePaint.getFontMetricsInt();
         mFontHeight = fmi.bottom - fmi.top;
     }
 
@@ -32,12 +30,6 @@ public class ContentControl extends Control {
         mFileReader = fileReader;
     }
 
-    public void setForeColor(int r, int g, int b) {
-        super.setForeColor(r, g, b);
-
-        mPaint.setARGB(0xFF, r, g, b);
-    }
-
     public void draw(Canvas canvas) {
         Log.d("hlreader", "TextView.onDraw|enter");
         char[] text = mFileReader.getLine();
@@ -47,9 +39,9 @@ public class ContentControl extends Control {
         Log.d("hlreader", String.format("TextView.onDraw|getLine 0|%s|length=%d", text == null ? "text=null" : "got text", text == null ? 0 : text.length));
         while (text != null) {
             do {
-                int count = mPaint.breakText(text, start, text.length - start, getRect().width(), null);
+                int count = mForePaint.breakText(text, start, text.length - start, getRect().width(), null);
                 Log.d("hlreader", String.format("TextView.onDraw|breakText|count=%d", count));
-                canvas.drawText(text, start, count, 0, yPos, mPaint);
+                canvas.drawText(text, start, count, 0, yPos, mForePaint);
                 start += count;
                 yPos += mFontHeight;
                 Log.d("hlreader", String.format("TextView.onDraw|draw line|start=%d|yPos=%d", start, yPos));
@@ -68,6 +60,5 @@ public class ContentControl extends Control {
 
         if (text != null)
             mFileReader.rollback(text.length - start);
-        mFileReader.readNext();
     }
 }

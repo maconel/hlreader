@@ -8,7 +8,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Bitmap.Config;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -19,11 +18,15 @@ import android.view.View.OnTouchListener;
 public class TextView extends SurfaceView implements SurfaceHolder.Callback, OnTouchListener, ButtonControlCallback {
     List<Control> mControls = new ArrayList<Control>();
     ContentControl mContentControl = null;
+    InfoBarControl mInfoBarControl = null;
     ButtonControl mNextPageButton = null;
     ButtonControl mPrevPageButton = null;
-    InfoBarControl mInfoBarControl = null;
+    ButtonControl mFindPageButton = null;
+    ButtonControl mPosPageButton = null;
+    ButtonControl mOpenPageButton = null;
     Canvas mBitmapCanvas = new Canvas();
     Bitmap mBitmap;
+    Bitmap mBitmap2;
     Paint mBitmapPaint = new Paint();
     FileReader mFileReader = new FileReader();
 
@@ -31,41 +34,68 @@ public class TextView extends SurfaceView implements SurfaceHolder.Callback, OnT
         super(context);
 
         mContentControl = new ContentControl(context);
+        mInfoBarControl = new InfoBarControl(context);
         mNextPageButton = new ButtonControl(context);
         mPrevPageButton = new ButtonControl(context);
-        mInfoBarControl = new InfoBarControl(context);
+        mFindPageButton = new ButtonControl(context);
+        mPosPageButton = new ButtonControl(context);
+        mOpenPageButton = new ButtonControl(context);
     }
 
     public TextView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         mContentControl = new ContentControl(context);
+        mInfoBarControl = new InfoBarControl(context);
         mNextPageButton = new ButtonControl(context);
         mPrevPageButton = new ButtonControl(context);
-        mInfoBarControl = new InfoBarControl(context);
+        mFindPageButton = new ButtonControl(context);
+        mPosPageButton = new ButtonControl(context);
+        mOpenPageButton = new ButtonControl(context);
     }
 
     public void init() {
         getHolder().addCallback(this);
         setOnTouchListener(this);
 
-        mNextPageButton.setBackColor(128, 128, 128);
-        mNextPageButton.setRect(200, 100, 300, 200);
         mNextPageButton.setCallback(this);
+        mNextPageButton.setRect(Config.nextPageButtonRect);
+        mNextPageButton.setForeColor(Config.buttonForeColor);
+        mNextPageButton.setBackColor(Config.buttonBackColor);
         mControls.add(mNextPageButton);
 
-        mPrevPageButton.setBackColor(128, 128, 128);
-        mPrevPageButton.setRect(0, 100, 100, 200);
         mPrevPageButton.setCallback(this);
+        mPrevPageButton.setRect(Config.prevPageButtonRect);
+        mPrevPageButton.setForeColor(Config.buttonForeColor);
+        mPrevPageButton.setBackColor(Config.buttonBackColor);
         mControls.add(mPrevPageButton);
 
+        mFindPageButton.setCallback(this);
+        mFindPageButton.setRect(Config.findButtonRect);
+        mFindPageButton.setForeColor(Config.buttonForeColor);
+        mFindPageButton.setBackColor(Config.buttonBackColor);
+        mControls.add(mFindPageButton);
+
+        mPosPageButton.setCallback(this);
+        mPosPageButton.setRect(Config.posButtonRect);
+        mPosPageButton.setForeColor(Config.buttonForeColor);
+        mPosPageButton.setBackColor(Config.buttonBackColor);
+        mControls.add(mPosPageButton);
+
+        mOpenPageButton.setCallback(this);
+        mOpenPageButton.setRect(Config.openButtonRect);
+        mOpenPageButton.setForeColor(Config.buttonForeColor);
+        mOpenPageButton.setBackColor(Config.buttonBackColor);
+        mControls.add(mOpenPageButton);
+
         mContentControl.setFileReader(mFileReader);
-        mContentControl.setForeColor(255, 255, 255);
+        mContentControl.setForeColor(Config.contentForeColor);
+        mContentControl.setBackColor(Config.contentBackColor);
         mControls.add(mContentControl);
 
         mInfoBarControl.setProgress(20);
-        mInfoBarControl.setForeColor(255, 255, 255);
-        mInfoBarControl.setBackColor(100, 100, 100);
+        mInfoBarControl.setForeColor(Config.contentForeColor);
+        mInfoBarControl.setBackColor(Config.contentBackColor);
         mControls.add(mInfoBarControl);
 
         for (Control control : mControls) {
@@ -83,7 +113,7 @@ public class TextView extends SurfaceView implements SurfaceHolder.Callback, OnT
         mFileReader.close();
     }
 
-    public void draw() {
+    public void drawToScreen() {
         SurfaceHolder holder = getHolder();
         Canvas canvas = holder.lockCanvas();
         canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
@@ -91,26 +121,30 @@ public class TextView extends SurfaceView implements SurfaceHolder.Callback, OnT
     }
 
     public void drawNextPage() {
-        draw();
+        swapBitmap();
+        drawToScreen();
+        mFileReader.readNext();
+        drawToBitmap();
+    }
 
-        mBitmapCanvas.drawARGB(0xFF, 0, 0, 0);
+    public void drawPrevPage() {
+        mFileReader.readPrev();
+        drawToBitmap();
+        drawNextPage();
+    }
+
+    public void drawToBitmap() {
+        mBitmapCanvas.drawColor(Config.contentBackColor);
         for (Control control : mControls) {
             control.draw(mBitmapCanvas);
         }
     }
 
-    public void drawPrevPage() {
-        mBitmapCanvas.drawARGB(0xFF, 0, 0, 0);
-        for (Control control : mControls) {
-            control.draw(mBitmapCanvas);
-        }
-
-        draw();
-
-        mBitmapCanvas.drawARGB(0xFF, 0, 0, 0);
-        for (Control control : mControls) {
-            control.draw(mBitmapCanvas);
-        }
+    public void swapBitmap() {
+        Bitmap tmpBitmap = mBitmap;
+        mBitmap = mBitmap2;
+        mBitmap2 = tmpBitmap;
+        mBitmapCanvas.setBitmap(mBitmap2);
     }
 
     @Override
@@ -126,33 +160,40 @@ public class TextView extends SurfaceView implements SurfaceHolder.Callback, OnT
         mContentControl.setRect(getLeft(), getTop(), getWidth(), getHeight() - 20);
         mInfoBarControl.setRect(0, getHeight() - 20, getWidth(), getHeight());
 
-        mBitmap = Bitmap.createBitmap(getWidth(), getHeight(), Config.RGB_565);
-        mBitmapCanvas.setBitmap(mBitmap);
+        mBitmap = Bitmap.createBitmap(getWidth(), getHeight(), android.graphics.Bitmap.Config.RGB_565);
+        mBitmap2 = Bitmap.createBitmap(getWidth(), getHeight(), android.graphics.Bitmap.Config.RGB_565);
+        mBitmapCanvas.setBitmap(mBitmap2);
 
-        mBitmapCanvas.drawARGB(0xFF, 0, 0, 0);
-        for (Control control : mControls) {
-            control.draw(mBitmapCanvas);
-        }
-
+        drawToBitmap();
         drawNextPage();
     }
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         for (Control control : mControls) {
-            if (control.inRect((int) event.getX(), (int) event.getY()))
+            if (control.inRect((int) event.getX(), (int) event.getY())) {
                 control.touch(event);
+                break;
+            }
         }
         return true;
     }
 
     @Override
     public void onClick(ButtonControl control) {
+        SurfaceHolder holder = getHolder();
+        Canvas canvas = holder.lockCanvas();
+        canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
+        control.drawFore(canvas);
+        holder.unlockCanvasAndPost(canvas);
+
         if (control == mNextPageButton) {
             drawNextPage();
         } else if (control == mPrevPageButton) {
-            mFileReader.readPrev();
             drawPrevPage();
+        } else if (control == mFindPageButton) {
+        } else if (control == mPosPageButton) {
+        } else if (control == mOpenPageButton) {
         }
     }
 }

@@ -21,13 +21,12 @@ public class MainActivity extends Activity {
         setContentView(R.layout.main);
 
         mTextView = (TextView) findViewById(R.id.textview);
-
-        Config.load();
     }
 
     protected void onStart() {
         super.onStart();
 
+        Config.load(this);
         mTextView.init();
     }
 
@@ -35,5 +34,6 @@ public class MainActivity extends Activity {
         super.onStop();
 
         mTextView.uninit();
+        Config.save(this);
     }
 }
